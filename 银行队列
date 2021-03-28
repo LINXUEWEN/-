@@ -1,0 +1,298 @@
+#pragma once
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+//定义银行客户
+typedef struct Client{
+	int arrival_time;//客户到达的时间
+	int duration;//客户办理业务所需时间
+}Client;
+
+//定义队列结点类型
+typedef struct Node{
+	Client data;
+	struct Node*next;
+}Node;
+
+//定义队列
+struct link_queue{
+	Node *front;
+	int length;//队列元素个数
+};
+
+#define link_queue_size 4
+
+Node* creat_node(Client data);
+struct link_queue* init_link();//建立头结点，初始化
+void free_link(struct link_queue* my_queue);//释放队列空间
+void en_queue(struct link_queue* my_queue,Client x);//入队
+void de_queue(struct link_queue* my_queue);//出队
+Client get_Front(struct link_queue* my_queue);//获取对头元素到item所指单元
+bool is_empty(struct link_queue* my_queue);//判断是否为空
+void clear_queue(struct link_queue* my_queue);//清空队列
+void print_queue(struct link_queue my_queue);//显示队列内容
+int queue_length(struct link_queue* my_queue);//获取队列元素个数
+
+
+typedef struct Evnode_data{
+	int occur_time;
+	int n_type;
+}Evnode_data;
+
+typedef struct Evnode{
+	Evnode_data data;
+	struct Evnode *next;
+}Evnode;
+
+typedef struct Event_list{
+	Evnode* head;
+	int size = 0;
+}Event_list;
+
+Evnode* creat_evnode(int occur_time, int n_type);
+Event_list* init_evlist();
+void free_evlink(Event_list* my_list);
+void add_node(Event_list* my_list, Evnode_data data);
+void delete_node(Event_list* my_list);
+Evnode_data get_node(Event_list* my_list);
+void display_node(Event_list my_list);
+bool is_empty_list(Event_list* my_list);
+
+#define CLOSE_TIME 40
+void my_random(int &dur_time, int &inter_time);
+double simulation();
+
+Node* creat_node(Client data)
+{
+	Node* newnode = (Node*)malloc(sizeof(Node));
+	newnode->next = NULL;
+	newnode->data.arrival_time = data.arrival_time;
+	newnode->data.duration = data.duration;
+	return newnode;
+}
+
+struct link_queue* init_link()
+{
+	struct link_queue* my_queue = (struct link_queue*)malloc(sizeof(struct link_queue));
+	my_queue->front = NULL;
+
+	my_queue->length = 0;
+	return my_queue;
+}
+
+void en_queue(struct link_queue*my_queue,Client x)
+{
+	Node* newnode = creat_node(x);
+	newnode->next = my_queue->front;
+	my_queue->front = newnode;
+	my_queue->length++;
+}
+
+void de_queue(struct link_queue* my_queue)
+{
+	if (my_queue->length == 0)
+		return;
+	Node* next = my_queue->front->next;
+	my_queue->front = my_queue->front->next;
+	
+	my_queue->length--;
+}
+
+Client get_Front(struct link_queue* my_queue)
+{
+	return my_queue->front->data;
+}
+
+bool is_empty(struct link_queue* my_queue)
+{
+	if (my_queue->length == 0)
+		return true;
+	return false;
+}
+
+void clear_queue(struct link_queue* my_queue)
+{
+	if (my_queue->length == 0)
+		return;
+	while (my_queue->length)
+	{
+		de_queue(my_queue);
+	}
+}
+
+void free_link(struct link_queue* my_queue)
+{
+	clear_queue(my_queue);
+	free(my_queue);
+	my_queue = NULL;
+}
+
+void print_queue(struct link_queue my_queue)
+{
+	if (my_queue.length == 0)
+		return;
+	while (my_queue.length--)
+	{
+		printf("[%d,", my_queue.front->data.arrival_time);
+		printf("%d]", my_queue.front->data.duration);
+		my_queue.front = my_queue.front->next;
+			printf("->");
+	}printf("\n");
+}
+
+int queue_length(struct link_queue* my_queue)
+{
+	return my_queue->length;
+}
+
+
+
+Evnode* creat_evnode(int occur_time, int n_type)
+{
+	Evnode* newnode = (Evnode*)malloc(sizeof(Evnode));
+	newnode->next = NULL;
+	newnode->data.n_type = n_type;
+	newnode->data.occur_time = occur_time;
+	return newnode;
+}
+
+Event_list* init_evlist()
+{
+	Event_list* my_list = (Event_list*)malloc(sizeof(Event_list));
+	my_list->head = NULL;
+	my_list->size = 0;
+	return my_list;
+}
+
+void add_node(Event_list* my_list, Evnode_data data)
+{
+	Evnode* newnode = creat_evnode(data.occur_time,data.n_type);
+	newnode->next = my_list->head;
+	my_list->head = newnode;
+	my_list->size++;
+}
+
+void delete_node(Event_list* my_list)
+{
+	if (my_list->size == 0)
+		return;
+	Evnode* next = my_list->head->next;
+	my_list->head = next;
+	my_list->size--;
+}
+
+bool is_empty_list(Event_list* my_list)
+{
+	if (my_list->size==0)
+		return true;
+	return false;
+}
+
+void free_evlink(Event_list* my_list)
+{
+	if (my_list->size == 0)
+		return;
+	while (my_list->size)
+	{
+		delete_node(my_list);
+	}
+	free(my_list);
+	my_list = NULL;
+}
+
+void display_node(Event_list my_list)
+{
+	if (my_list.size == 0)
+		return;
+	while (my_list.size--)
+	{
+		printf("[%d,", my_list.head->data.occur_time);
+		printf("%d]", my_list.head->data.n_type);
+		my_list.head = my_list.head->next;
+		printf("->");
+	}printf("\n");
+}
+
+Evnode_data get_node(Event_list* my_list)
+{
+		return my_list->head->data;
+}
+
+
+void my_random(int &dur_time, int &inter_time)
+{
+	dur_time = rand() % 20 + 1;
+	inter_time = rand() % 10 + 1;
+}
+
+int find_min(struct link_queue *my_queue, int  n=link_queue_size)
+{
+	int min = 0;
+	int i = 0;
+	for (i = 0; i < n; i++)
+	{
+		if (queue_length(my_queue+i)<min)
+			min = queue_length(my_queue + i);
+	}
+	return min;
+}
+
+double simulation()
+{
+	int total_time = 0;//为客户服务总时长
+	int customer_num = 0;//客户人数
+	int dur_time = 0;//当前客户服务时间
+	int inter_time = 0;//下一个客户到来的间隔时间
+	int min = 0;
+	srand((unsigned int)time(NULL));
+	struct link_queue* my_queue = 0;
+	Event_list* my_list = 0;
+	Client data2 = { 0, 0 };
+	Evnode_data data1 = { 0, -1 };
+	add_node(my_list, data1);
+	while (!is_empty_list(my_list))
+	{
+		data1 = get_node(my_list);
+		delete_node(my_list);
+		if (data1.n_type == -1)
+		{
+			customer_num++;
+			my_random(dur_time, inter_time);
+			if (data1.occur_time + inter_time < CLOSE_TIME)
+			{
+				data1.occur_time = data1.occur_time + inter_time;
+				data1.n_type = -1;
+				add_node(my_list, data1);
+				display_node(*my_list);
+			}
+			min = find_min(my_queue, link_queue_size);
+			data2.arrival_time = data1.occur_time;
+			data2.duration = dur_time;
+			en_queue((my_queue + min), data2);
+			print_queue(*(my_queue+min));
+			if ((my_queue+min)->length == 1)
+			{
+				data1.occur_time = data1.n_type + dur_time;
+				data1.n_type = min;
+				add_node(my_list, data1);
+			}
+		}
+		else
+		{
+			int win = data1.n_type;
+			de_queue(my_queue + min);
+			total_time = total_time + data2.duration;
+			if ((my_queue + win)->length != 0)
+			{
+				data2 = get_Front(my_queue + win);
+				data1.occur_time = data1.occur_time + data2.duration;
+				data1.n_type = win;
+				add_node(my_list, data1);
+			}
+		}
+		print_queue(*my_queue);
+		display_node(*my_list);
+	}
+	return total_time*1.0 / customer_num;
+}
